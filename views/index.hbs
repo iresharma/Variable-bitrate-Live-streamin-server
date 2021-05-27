@@ -68,7 +68,7 @@
         </div>
       </div>
       <div class="TableObject" style="width: 40%">
-        {{#if fileLen}}
+        {{#if filesLen}}
           {{#each files}}
             <div
               class="TableObject-item TableObject-item--primary"
@@ -78,7 +78,7 @@
                 class="btn ml-2 btn-primary"
                 type="button"
               >Download</button>
-              <button class="btn ml-2" type="button">Play</button>
+              <a class="btn ml-2" href="{{this.play}}" type="button">Play</a>
             </div>
           {{/each}}
         {{else}}

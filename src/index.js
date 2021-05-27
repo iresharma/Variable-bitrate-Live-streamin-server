@@ -1,13 +1,15 @@
-let express = require("express");
+import express from "express";
 let app = express();
-let multer = require("multer");
-let path = require("path");
+import path from "path";
+import multer from "multer";
 
-let fs = require("fs");
-let ffmpeg = require("fluent-ffmpeg");
+import fs from "fs";
+import ffmpeg from "fluent-ffmpeg";
+
+const dir = path.join(path.resolve(path.dirname("")), "src");
 
 let storage = multer.diskStorage({
-  destination: `${__dirname}/uploadedVideos`,
+  destination: `${dir}/uploadedVideos`,
   filename: (_, file, cb) => {
     cb(null, file.originalname.replace(" ", "-"));
   },
@@ -17,27 +19,44 @@ let upload = multer({
   storage: storage,
 });
 
-let hbs = require("hbs");
+import hbs from "hbs";
 app.set("view engine", "hbs");
+
+import { Low, JSONFile } from "lowdb";
+const file = path.join(dir, "db/db.json");
+const adapter = new JSONFile(file);
+const db = new Low(adapter);
+
+await db.read();
+
+if (!db.data) {
+  db.data = { videos: [] };
+}
+
+await db.write();
+
+console.log(db.data);
 
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || `http://localhost:${PORT}`;
 
-console.log(path.join(__dirname, "hls-Streams"));
+console.log(path.join(dir, "hls-Streams"));
 
-app.use("/streams", express.static(path.join(__dirname, "hls-Streams")));
-app.use("/js", express.static(path.join(__dirname, "viewUtils")))
+app.use("/streams", express.static(path.join(dir, "hls-Streams")));
+app.use("/js", express.static(path.join(dir, "viewUtils")));
 
 app.get("/", (_, res) => {
-  res.status(200).render("index", {
-    files: [],
-    filesLen: false,
-  });
+  db.read().then(() =>
+    res.status(200).render("index", {
+      files: db.data.videos,
+      filesLen: db.data.videos.length != 0,
+    })
+  );
 });
 
 app.post("/upload", upload.single("video"), (req, res) => {
   console.log(req.file);
-  fs.mkdirSync(`${__dirname}/hls-Streams/${req.file.filename.split(".")[0]}`);
+  fs.mkdirSync(`${dir}/hls-Streams/${req.file.filename.split(".")[0]}`);
   //   Convert the incoming video file to a HLS ts file and generating a m3u8 playlist
   ffmpeg()
     .addOptions([
@@ -50,13 +69,11 @@ app.post("/upload", upload.single("video"), (req, res) => {
       "-f hls", // HLS format
     ])
     .input(req.file.path)
-    .output(
-      `${__dirname}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`
-    )
+    .output(`${dir}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`)
     .on("end", () => {
       console.log("done");
       fs.readFile(
-        `${__dirname}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
+        `${dir}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
         "utf-8",
         (err, data) => {
           if (err) {
@@ -69,11 +86,15 @@ app.post("/upload", upload.single("video"), (req, res) => {
           );
           console.log(newData);
           fs.writeFileSync(
-            `${__dirname}/hls-Streams/${
-              req.file.filename.split(".")[0]
-            }/out.m3u8`,
+            `${dir}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
             newData
           );
+          console.log(db.data);
+          db.data.videos.push({
+            name: req.file.originalname,
+            play: `/view/${req.file.filename.split(".")[0]}`,
+          });
+          db.write().then(() => console.log("db updated"));
           res.status(200).redirect("/");
         }
       );
@@ -86,15 +107,19 @@ app.post("/upload", upload.single("video"), (req, res) => {
 });
 
 app.get("/view/:name", (req, res) => {
-  res.status(200).render("view", {
-    filename: req.params.name,
-    link: `${HOST}/stream/${req.params.name}`,
-  });
+  db.read().then(() =>
+    res.status(200).render("view", {
+      files: db.data.videos,
+      filesLen: db.data.videos.length != 0,
+      filename: req.params.name,
+      link: `${HOST}/stream/${req.params.name}`,
+    })
+  );
 });
 
 app.get("/stream/:name", (req, res) => {
   let name = req.params.name;
-  res.status(200).sendFile(`${__dirname}/hls-Streams/${name}/out.m3u8`);
+  res.status(200).sendFile(`${dir}/hls-Streams/${name}/out.m3u8`);
 });
 
 app.listen(PORT, () => console.log(`Server running locally at PORT:${PORT}`));

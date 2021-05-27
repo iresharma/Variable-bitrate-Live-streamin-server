@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "HTTP Live Streaming server atempt",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "echo \"Running HLS Server\" && nodemon src/index.js"
