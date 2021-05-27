@@ -1,0 +1,14 @@
+# Ignoring node_modules
+node_modules
+
+# Ignoring all hls-streams
+hls-Streams/*
+
+# Keeping md files in hls-streams
+!hls-Streams/*.md
+
+# Ignoring all uploadedVideos
+uploadedVideos/*
+
+# Keeping md files in uploadedVideos
+!uploadedVideos/*.md
