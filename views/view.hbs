@@ -49,9 +49,9 @@
           Here's a list of video uploaded and converted to hls streams
         </div>
       </div>
-      <div class="TableObject" style="width: 40%">
-        {{#if filesLen}}
+      {{#if filesLen}}
           {{#each files}}
+          <div class="TableObject mt-2" style="width: 40%">
             <div
               class="TableObject-item TableObject-item--primary"
             >{{this.name}}</div>
@@ -62,8 +62,10 @@
               >Download</button>
               <a class="btn ml-2" href="{{this.play}}" type="button">Play</a>
             </div>
+          </div>
           {{/each}}
         {{else}}
+        <div class="TableObject" style="width: 40%"></div>
           <div class="flash mt-3 flash-error">
             <!-- <%= octicon "flame" %> -->
             <svg
@@ -80,8 +82,8 @@
               ></path></svg>
             No video uploaded yet 🥲
           </div>
+        </div>
         {{/if}}
-      </div>
     </div>
     </div>
   </body>

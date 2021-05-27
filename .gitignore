@@ -12,3 +12,7 @@ src/uploadedVideos/*
 
 # Keeping md files in uploadedVideos
 !src/uploadedVideos/*.md
+
+# Keeping the demo template and removing actual db
+src/db/db.json
+!src/db/db-Example.json
