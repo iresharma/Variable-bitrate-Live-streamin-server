@@ -1,25 +1,129 @@
-<!DOCTYPE html>
-<html lang="en">
+<html data-color-mode="dark" data-dark-theme="dark_dimmed" lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HLS Service Testing</title>
-    <link rel="stylesheet" href="https://unpkg.com/xp.css" />
+    <link
+      href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css"
+      rel="stylesheet"
+    />
   </head>
-  <style>
-    .flex {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-  </style>
-  <body class="flex">
-      <h3>Input the video file you'd like to convert to hls stream</h3>
-      <form class="flex" action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="video" id="vid" />
-        <button type="submit">Submit</button>
-      </form>
+  <body>
+    <div class="Header">
+      <div class="Header-item">HLS Server - Demo</div>
+      <div class="Header-item">
+        <a
+          href="https://github.com/iresharma/hls-server"
+          class="Header-link"
+        >About</a>
+      </div>
+    </div>
+    <div
+      id="loader"
+      class="width-full flex-items-center flex-justify-center"
+      style="height: 100vh; display: none; position: absolute; top: 0; z-index: 5000;"
+    >
+      <div>
+        <h2><span>Loading</span><span class="AnimatedEllipsis"></span></h2>
+      </div>
+    </div>
+    <div
+      id="content"
+      class="d-flex flex-column flex-justify-center flex-items-center width-full height-full"
+    >
+      <div class="blankslate">
+        <img
+          src="https://ghicons.github.com/assets/images/blue/png/Community-powered.png"
+          alt=""
+          class="mb-3"
+        />
+        <h3 class="mb-1">
+          Input the video file you'd like to convert to hls stream
+        </h3>
+        <p>
+          This video file will be then taken and divided into 10 sec segments
+          and served at diff qualities
+        </p>
+        <form
+          id="form"
+          action="/upload"
+          method="POST"
+          enctype="multipart/form-data"
+        >
+          <input
+            type="file"
+            accept="video/mp4"
+            class="btn btn-primary"
+            name="video"
+            id="vid"
+          />
+          <span class="btn btn-outline" onclick="loader()">Submit</span>
+        </form>
+      </div>
+      <div class="Subhead mt-12">
+        <div class="Subhead-heading">Previously uploaded videos</div>
+        <div class="Subhead-description">
+          Here's a list of video uploaded and converted to hls streams
+        </div>
+      </div>
+      <div class="TableObject" style="width: 40%">
+        {{#if fileLen}}
+          {{#each files}}
+            <div
+              class="TableObject-item TableObject-item--primary"
+            >{{this.name}}</div>
+            <div class="TableObject-item">
+              <button
+                class="btn ml-2 btn-primary"
+                type="button"
+              >Download</button>
+              <button class="btn ml-2" type="button">Play</button>
+            </div>
+          {{/each}}
+        {{else}}
+          <div class="flash mt-3 flash-error">
+            <!-- <%= octicon "flame" %> -->
+            <svg
+              class="octicon octicon-flame"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              width="16"
+              height="16"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M7.99789 14.5001C10.8304 14.5001 12.9971 12.5193 12.9971 10C12.9971 8.53654 12.3174 7.80948 11.1193 6.61667C11.1071 6.60453 11.0949 6.59236 11.0826 6.58014C10.0696 5.57183 8.7824 4.29061 8.24911 2.14559C7.92718 2.40211 7.61813 2.72476 7.38529 3.09924C6.95273 3.79496 6.7637 4.67919 7.33879 5.82934C7.81231 6.77637 8.00841 8.11294 7.06066 9.06069C6.45006 9.67129 5.51641 9.90115 4.65812 9.69385C4.1002 9.55909 3.61121 9.25672 3.22215 8.81981C3.08407 9.16747 3.00001 9.57013 3 10.0001C2.99994 12.5298 5.1636 14.5001 7.99789 14.5001ZM9.5332 0.752514C9.49562 0.340008 9.16001 0.00931669 8.76889 0.145686C7.03463 0.750359 4.34051 3.18696 5.99715 6.50017C6.34142 7.1887 6.28164 7.71839 6 8.00003C5.58104 8.41899 4.45998 8.4869 3.95925 7.16847C3.78678 6.71435 3.30098 6.40593 2.92501 6.71353C2.03625 7.44067 1.50003 8.70216 1.5 10C1.49992 13.5121 4.49789 16.0001 7.99789 16.0001C11.4979 16.0001 14.4971 13.5 14.4971 10C14.4971 7.86282 13.3699 6.74064 12.1862 5.56222C10.9968 4.37809 9.7504 3.13717 9.5332 0.752514Z"
+              ></path></svg>
+            No video uploaded yet 🥲
+          </div>
+        {{/if}}
+      </div>
+    </div>
+    <div
+      style="position: fixed; bottom: 0; display: none;"
+      id="toast"
+      class="p-1"
+    >
+      <div class="Toast">
+        <span class="Toast-icon">
+          <svg
+            width="14"
+            height="16"
+            viewBox="0 0 14 16"
+            class="octicon octicon-info"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"
+            ></path>
+          </svg>
+        </span>
+        <span class="Toast-content">Server is working on your upload</span>
+      </div>
+    </div>
+    <script src="/js/index.js"></script>
   </body>
 </html>

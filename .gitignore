@@ -2,13 +2,13 @@
 node_modules
 
 # Ignoring all hls-streams
-hls-Streams/*
+src/hls-Streams/*
 
 # Keeping md files in hls-streams
-!hls-Streams/*.md
+!src/hls-Streams/*.md
 
 # Ignoring all uploadedVideos
-uploadedVideos/*
+src/uploadedVideos/*
 
 # Keeping md files in uploadedVideos
-!uploadedVideos/*.md
+!src/uploadedVideos/*.md

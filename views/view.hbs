@@ -1,0 +1,48 @@
+<html data-color-mode="dark" data-dark-theme="dark_dimmed" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HLS Service Testing</title>
+    <link
+      href="https://unpkg.com/@primer/css@^16.0.0/dist/primer.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="Header">
+      <div class="Header-item"><a href="/" style="text-decoration: none; color: gray">HLS Server - Demo</a></div>
+      <div class="Header-item">
+        <a
+          href="https://github.com/iresharma/hls-server"
+          class="Header-link"
+        >About</a>
+      </div>
+    </div>
+    <div
+      class="d-flex flex-column flex-justify-center flex-items-center width-full height-full"
+    >
+      <div class="blankslate">
+        <img
+          src="https://ghicons.github.com/assets/images/blue/png/Community-powered.png"
+          alt=""
+          class="mb-3"
+        />
+        <h3 class="mb-1">
+          {{filename}}
+        </h3>
+        <p>
+          Say hello to your HLS stream, open
+          <br />
+          <code>
+            devtools > network
+          </code>
+          <br />
+          and throttle your network connection to see the video quality change
+          in real-time.
+        </p>
+      </div>
+      <video autoplay loop src="{{link}}"></video>
+    </div>
+  </body>
+</html>

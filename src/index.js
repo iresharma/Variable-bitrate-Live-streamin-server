@@ -1,33 +1,43 @@
-var app = require("express")();
-var multer = require("multer");
+let express = require("express");
+let app = express();
+let multer = require("multer");
+let path = require("path");
 
-var fs = require("fs");
-var ffmpeg = require("fluent-ffmpeg");
+let fs = require("fs");
+let ffmpeg = require("fluent-ffmpeg");
 
-var storage = multer.diskStorage({
-  destination: "uploadedVideos",
+let storage = multer.diskStorage({
+  destination: `${__dirname}/uploadedVideos`,
   filename: (_, file, cb) => {
     cb(null, file.originalname.replace(" ", "-"));
   },
 });
 
-var upload = multer({
+let upload = multer({
   storage: storage,
 });
 
-var hbs = require("hbs");
+let hbs = require("hbs");
 app.set("view engine", "hbs");
 
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || `http://localhost:${PORT}`;
 
-app.get("/", (req, res) => {
-  res.status(200).render("index");
+console.log(path.join(__dirname, "hls-Streams"));
+
+app.use("/streams", express.static(path.join(__dirname, "hls-Streams")));
+app.use("/js", express.static(path.join(__dirname, "viewUtils")))
+
+app.get("/", (_, res) => {
+  res.status(200).render("index", {
+    files: [],
+    filesLen: false,
+  });
 });
 
 app.post("/upload", upload.single("video"), (req, res) => {
   console.log(req.file);
-  fs.mkdirSync(`hls-Streams/${req.file.filename.split(".")[0]}`);
+  fs.mkdirSync(`${__dirname}/hls-Streams/${req.file.filename.split(".")[0]}`);
   //   Convert the incoming video file to a HLS ts file and generating a m3u8 playlist
   ffmpeg()
     .addOptions([
@@ -40,32 +50,51 @@ app.post("/upload", upload.single("video"), (req, res) => {
       "-f hls", // HLS format
     ])
     .input(req.file.path)
-    .output(`hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`)
+    .output(
+      `${__dirname}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`
+    )
     .on("end", () => {
       console.log("done");
       fs.readFile(
-        `hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
+        `${__dirname}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
         "utf-8",
         (err, data) => {
           if (err) {
             console.error(err);
             res.status(500).send("error in refactoring playlist file");
           }
-          let newData = data.replace(/out/gim, `${HOST}/out`);
+          let newData = data.replace(
+            /out/gim,
+            `${HOST}/streams/${req.file.filename.split(".")[0]}/out`
+          );
           console.log(newData);
           fs.writeFileSync(
-            `hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
+            `${__dirname}/hls-Streams/${
+              req.file.filename.split(".")[0]
+            }/out.m3u8`,
             newData
           );
-          res.status(200).send("lets see");
+          res.status(200).redirect("/");
         }
       );
     })
-    .on("error", function (err, stdout, stderr) {
+    .on("error", (err, stdout, stderr) => {
       console.log("Cannot process video: " + err.message);
       res.status(500).send("umm this is bad");
     })
     .run();
+});
+
+app.get("/view/:name", (req, res) => {
+  res.status(200).render("view", {
+    filename: req.params.name,
+    link: `${HOST}/stream/${req.params.name}`,
+  });
+});
+
+app.get("/stream/:name", (req, res) => {
+  let name = req.params.name;
+  res.status(200).sendFile(`${__dirname}/hls-Streams/${name}/out.m3u8`);
 });
 
 app.listen(PORT, () => console.log(`Server running locally at PORT:${PORT}`));

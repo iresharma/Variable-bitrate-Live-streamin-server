@@ -8,6 +8,6 @@ A small attempt to create a server that takes normal videos ad converts them int
 - [x] Generate `.ts` segments
 - [x] Generate `.m3u8` playlist
 - [x] Edit `.m3u8 playlist` to support streaming from server
-- [ ] player weview
+- [x] player webview
 - [ ] lowdb for caching
 - [ ] robust error handling
