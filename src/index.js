@@ -123,7 +123,11 @@ app.post("/upload", upload.single("video"), (req, res) => {
   fs.mkdirSync(`${dir}/hls-Streams/${req.file.filename.split(".")[0]}`);
   fs.mkdirSync(`${dir}/MPEG-DASH-Streams/${req.file.filename.split(".")[0]}`);
 
-  //* FFmpeg conversion
+  // ===============================================================================================================
+  //* FFmpeg conversion from mp4 -> HLS
+
+
+
   // Convert the incoming video file to a HLS ts file and generating a m3u8 playlist
   ffmpeg()
     .addOptions([
@@ -137,8 +141,17 @@ app.post("/upload", upload.single("video"), (req, res) => {
     ])
     .input(req.file.path)
     .output(`${dir}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`)
+
+
+
+  // ===============================================================================================================
     .on("end", () => {
       console.log(logger.FgGreen + "done with HLS-Stream" + logger.Reset);
+      // ===============================================================================================================
+      //* FFmpeg conversion from HLS -> MPEG-DASH
+
+
+
       ffmpeg()
         .addInput(
           `${dir}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`
@@ -156,9 +169,16 @@ app.post("/upload", upload.single("video"), (req, res) => {
         .output(
           `${dir}/MPEG-DASH-Streams/${req.file.filename.split(".")[0]}/out.mpd`
         )
+
+
+
+
+        // ===============================================================================================================
         .on("end", () => {
           // Open the .m3u8 playlist file to modify the source for time segments
           console.log("done with MPAEG-DASH-Stream");
+
+          // ? This readFile function manipulates the .m3u8 file to convert all paths to hosted static paths
           fs.readFile(
             `${dir}/hls-Streams/${req.file.filename.split(".")[0]}/out.m3u8`,
             "utf-8",
@@ -167,17 +187,23 @@ app.post("/upload", upload.single("video"), (req, res) => {
                 console.error(err);
                 res.status(500).send("error in refactoring playlist file");
               }
+
+
               // Replace out{n}.ts with {HOST}/streams/out{n}.ts
               let newData = data.replace(
                 /out/gim,
                 `${HOST}/hls-streams/${req.file.filename.split(".")[0]}/out`
               );
+
+
+              // Writing new data to .m3u8 file
               fs.writeFileSync(
                 `${dir}/hls-Streams/${
                   req.file.filename.split(".")[0]
                 }/out.m3u8`,
                 newData
               );
+              // ? This readFile function manipulates the .mpd file to convert all paths to hosted static paths
               fs.readFile(
                 `${dir}/MPEG-DASH-Streams/${
                   req.file.filename.split(".")[0]
@@ -188,6 +214,9 @@ app.post("/upload", upload.single("video"), (req, res) => {
                     console.error(err);
                     res.status(500).send("error in refactoring playlist file");
                   }
+
+
+
                   // Replace segment routes in .mpd MANIFEST file
                   let newData = data.replace(
                     "init-stream$RepresentationID$.m4s",
@@ -197,12 +226,17 @@ app.post("/upload", upload.single("video"), (req, res) => {
                     "chunk-stream$RepresentationID$-$Number%05d$.m4s",
                     `${HOST}/mpeg-Streams/${req.file.filename.split(".")[0]}/chunk-stream$RepresentationID$-$Number%05d$.m4s`
                   );
+
+
+                  // Writing newData to .mpd file
                   fs.writeFileSync(
                     `${dir}/MPEG-DASH-Streams/${
                       req.file.filename.split(".")[0]
                     }/out.mpd`,
                     newData
                   );
+
+
                   // Writing to db
                   db.data.videos.push({
                     name: req.file.originalname,
@@ -238,6 +272,8 @@ app.get("/view/:name", (req, res) => {
       files: db.data.videos,
       filesLen: db.data.videos.length != 0,
       filename: req.params.name,
+
+      // deciding if we need a MPEG-DASH Stream or a HLS Stream
       link: `${HOST}/stream/${req.params.name}?mpd=${
         req.useragent.isChrome ||
         req.useragent.isFirefox ||
