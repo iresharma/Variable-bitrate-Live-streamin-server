@@ -7,3 +7,12 @@ function loader() {
     document.getElementById("form").submit();
   }, 500);
 }
+
+
+function play(url) {
+  var context = new Dash.di.DashContext();
+  var player = new MediaPlayer(context);
+                  player.startup();
+                  player.attachView(document.querySelector("#videoplayer"));
+                  player.attachSource(url);
+}

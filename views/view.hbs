@@ -42,7 +42,16 @@
           in real-time.
         </p>
       </div>
-      <video autoplay loop controls src="{{link}}"></video>
+      <video autoplay loop controls>
+        <source src="{{link}}" type="application/x-mpegURL">
+        <source src="{{link}}" type="application/vnd.apple.mpegURL">
+        <source src="{{link}}" type="video/MP2T">
+        <source src="{{link}}" type="application/dash+xml">
+        <!-- fallback -->
+        <source src="{{link}}" type="video/mp4">
+        <source src="{{link}}" type="video/webm">
+        Your browser neither supports HLS nor MPEG-DASH-Streaming
+      </video>
       <div class="Subhead mt-12">
         <div class="Subhead-heading">Previously uploaded videos</div>
         <div class="Subhead-description">

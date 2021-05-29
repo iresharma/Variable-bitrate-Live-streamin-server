@@ -24,6 +24,7 @@
   "homepage": "https://github.com/iresharma/HLS-Server#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "express-useragent": "^1.0.15",
     "fluent-ffmpeg": "^2.1.2",
     "hbs": "^4.1.2",
     "lowdb": "^2.1.0",

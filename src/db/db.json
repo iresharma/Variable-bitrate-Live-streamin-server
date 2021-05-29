@@ -1,12 +1,3 @@
 {
-  "videos": [
-    {
-      "name": "pexels-cottonbro-6054890.mp4",
-      "play": "/view/pexels-cottonbro-6054890"
-    },
-    {
-      "name": "mixkit-huge-trees-in-a-large-green-forest-5040.mp4",
-      "play": "/view/mixkit-huge-trees-in-a-large-green-forest-5040"
-    }
-  ]
+  "videos": []
 }

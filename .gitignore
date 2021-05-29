@@ -7,6 +7,12 @@ src/hls-Streams/*
 # Keeping md files in hls-streams
 !src/hls-Streams/*.md
 
+# Ignoring all MPEG_DASH-streams
+src/MPEG-DASH-Streams/*
+
+# Keeping md files in MPEG_DASH-streams
+!src/MPEG-DASH-Streams/*.md
+
 # Ignoring all uploadedVideos
 src/uploadedVideos/*
 
