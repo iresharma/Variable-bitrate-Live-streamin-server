@@ -3,7 +3,7 @@
 This a small attempt to use a create a multiple protocol live streaming server which takes in a a video file and convert into both a HLS video format(time segment files & .m3u8 playlist) and MPEG-DASH format(.mpd manifest & .m4s chunks).
 
 ## What are these protocols
-Blog coming soon stay tuned [watchireshstruggle](https://watchireshstruggle.hashnode.dev)
+Checkout my [blog about it](https://watchireshstruggle.hashnode.dev)
 ## How it works
 The whole logic in wrapped around by a express.js based webserver.
 It uses the `multer` library to handle file uploads and store them locally. This is followed by a library `fluent-ffmpeg` which is a wrapper around `ffmpeg` the C based audio video manipulation library. We use a few ffmpeg functions to create a the required streams from the uploaded mp4, which are stored in the `hls-Streams/<filename>/` and `MPEG-DASH-Streams/<filename>/` folders which are added as static files for the server using `express.static`.
